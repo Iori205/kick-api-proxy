@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Check your Counter-Strike and Dota 2 player stats" />
+    <title>SteamRank — Player stats</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <nav class="nav">
+        <a class="brand" href="/" aria-label="SteamRank home"><span class="brand-mark">S</span> SteamRank</a>
+        <span class="nav-note">Player stats lookup</span>
+      </nav>
+
+      <section class="hero">
+        <div class="eyebrow">STEAM PROFILE ANALYZER</div>
+        <h1>Know your <span>game.</span></h1>
+        <p class="subtitle">Enter a Steam ID and get your competitive stats in seconds.</p>
+
+        <div class="game-switcher" role="tablist" aria-label="Select a game">
+          <button class="game-tab active" type="button" data-game="cs" role="tab" aria-selected="true">
+            <span class="game-icon cs-icon">CS</span>
+            <span><strong>Counter-Strike</strong><small>Premier & FACEIT</small></span>
+          </button>
+          <button class="game-tab" type="button" data-game="dota" role="tab" aria-selected="false">
+            <span class="game-icon dota-icon">D2</span>
+            <span><strong>Dota 2</strong><small>MMR & medal</small></span>
+          </button>
+        </div>
+
+        <form class="search-form" id="lookup-form">
+          <label for="steamid">Steam ID</label>
+          <div class="input-row">
+            <input id="steamid" name="steamid" inputmode="numeric" autocomplete="off" placeholder="76561198000000000" required />
+            <button class="search-button" type="submit"><span>Search stats</span><span aria-hidden="true">→</span></button>
+          </div>
+          <div class="hint">Use a 17-digit Steam64 ID or a Steam32 ID.</div>
+        </form>
+      </section>
+
+      <section class="result-area" id="result-area" aria-live="polite">
+        <div class="empty-state" id="empty-state">
+          <div class="empty-icon">⌁</div>
+          <h2>Your stats will appear here</h2>
+          <p>Choose a game, enter your Steam ID, and hit search.</p>
+        </div>
+        <div class="loading hidden" id="loading"><span class="spinner"></span> Looking up player stats…</div>
+        <div class="error hidden" id="error"></div>
+        <article class="profile-card hidden" id="profile-card">
+          <div class="profile-top">
+            <div class="avatar" id="avatar">?</div>
+            <div><div class="result-label" id="result-game">PLAYER PROFILE</div><h2 id="player-name">Player</h2><p id="player-id"></p></div>
+            <span class="status"><i></i> Found</span>
+          </div>
+          <div class="stats-grid" id="stats-grid"></div>
+        </article>
+      </section>
+      <footer>SteamRank · Stats provided by public game data APIs</footer>
+    </main>
+    <script src="/app.js" defer></script>
+  </body>
+</html>

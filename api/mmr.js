@@ -1,8 +1,7 @@
 import { medalFromRankTier, mmrFromRankTier } from "../lib/dota.js";
 import { withApi } from "../lib/http.js";
+import { fetchDotaProfile } from "../lib/opendota.js";
 import { parseSteamId } from "../lib/steam.js";
-
-const OPENDOTA_API = "https://api.opendota.com/api/players";
 
 export default withApi(async function handler(req, res) {
   const steam = parseSteamId(req.query.steamid);
@@ -11,19 +10,17 @@ export default withApi(async function handler(req, res) {
     return res.status(400).json({ error: "Valid steamid required" });
   }
 
-  const response = await fetch(`${OPENDOTA_API}/${steam.steam32}`, {
-    headers: { Accept: "application/json" },
-  });
+  const result = await fetchDotaProfile(steam.steam32);
 
-  if (response.status === 404) {
-    return res.status(404).json({ error: "Player not found" });
-  }
+  if (!result.data) {
+    if (result.status === 404) {
+      return res.status(404).json({ error: "Player not found" });
+    }
 
-  if (!response.ok) {
     return res.status(502).json({ error: "MMR provider unavailable" });
   }
 
-  const data = await response.json();
+  const data = result.data;
   const medal = medalFromRankTier(data.rank_tier, data.leaderboard_rank);
   const mmr =
     data.solo_competitive_rank ??

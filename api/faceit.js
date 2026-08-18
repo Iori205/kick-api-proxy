@@ -1,4 +1,4 @@
-import { withApi } from "../lib/http.js";
+import { fetchJson, withApi } from "../lib/http.js";
 import { parseSteamId } from "../lib/steam.js";
 
 const FACEIT_API = "https://open.faceit.com/data/v4/players";
@@ -11,26 +11,26 @@ async function faceitLevelFromOfficialApi(steam64) {
   }
 
   for (const game of ["cs2", "csgo"]) {
-    const response = await fetch(
+    const result = await fetchJson(
       `${FACEIT_API}?game=${game}&game_player_id=${encodeURIComponent(steam64)}`,
       {
-        headers: {
-          Accept: "application/json",
-          Authorization: `Bearer ${apiKey}`,
-        },
+        headers: { Authorization: `Bearer ${apiKey}` },
+        retries: 2,
+        timeoutMs: 6000,
       },
     );
 
-    if (!response.ok) {
+    if (!result.ok) {
       continue;
     }
 
-    const data = await response.json();
     const level =
-      data.games?.cs2?.skill_level ?? data.games?.csgo?.skill_level ?? null;
+      result.data.games?.cs2?.skill_level ??
+      result.data.games?.csgo?.skill_level ??
+      null;
 
     if (level != null) {
-      return { rank: String(level), name: data.nickname ?? null };
+      return { rank: String(level), name: result.data.nickname ?? null };
     }
   }
 
@@ -38,30 +38,29 @@ async function faceitLevelFromOfficialApi(steam64) {
 }
 
 async function faceitLevelFromLeetify(steam64) {
-  const headers = { Accept: "application/json" };
+  const headers = {};
   const apiKey = process.env.LEETIFY_API_KEY;
 
   if (apiKey) {
     headers.Authorization = `Bearer ${apiKey}`;
   }
 
-  const response = await fetch(
+  const result = await fetchJson(
     `${LEETIFY_API}?steam64_id=${encodeURIComponent(steam64)}`,
-    { headers },
+    { headers, retries: 2, timeoutMs: 8000 },
   );
 
-  if (!response.ok) {
+  if (!result.ok) {
     return null;
   }
 
-  const data = await response.json();
-  const level = data.ranks?.faceit;
+  const level = result.data.ranks?.faceit;
 
   if (level == null || level <= 0) {
     return null;
   }
 
-  return { rank: String(level), name: data.name ?? null };
+  return { rank: String(level), name: result.data.name ?? null };
 }
 
 export default withApi(async function handler(req, res) {
